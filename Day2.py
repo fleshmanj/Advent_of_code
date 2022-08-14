@@ -2,10 +2,7 @@ import requests
 
 url = "https://adventofcode.com/2015/day/2/input"
 
-cookies = {"_ga": "GA1.2.1248021130.1660347335",
-           "_gid": "GA1.2.207307331.1660347335",
-           "session": "53616c7465645f5f28ed115d40ff354e9b1526b666d199539096604c83746d5f3319c326c38d33e4400cf026f5ea4b590449f2bfdb83bb25905b5498a1c1897c"
-           }
+
 response = requests.get(url=url, cookies=cookies)
 
 raw = response.content
