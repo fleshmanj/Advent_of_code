@@ -1,4 +1,5 @@
 import requests
+from mine import cookies
 
 url = "https://adventofcode.com/2015/day/2/input"
 

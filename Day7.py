@@ -1,32 +1,17 @@
 import decimal
 import string
-
-base = 0b0000000000000000
-for i in range(base):
-    print(i)
-
-print(type(base))
-x = 123
-x = bin(x)
-print(x)
+from bitarray import bitarray
 
 
-def not_gate(wire_in: bin, wireout):
-    wireout = "0b"
-    for i, number in enumerate(wire_in):
-        if number == "1":
-            wireout = wireout + "0"
-        else:
-            wireout = wireout + "1"
-    print(wireout)
 
 
-not_gate(x, base)
 
-input_string = """NOT dq -> dr
+
+input_string = """1 -> one
+NOT dq -> dr
 kg OR kf -> kh
 ep OR eo -> eq
-44430 -> b
+3176 -> b
 NOT gs -> gt
 dd OR do -> dp
 eg AND ei -> ej
@@ -44,7 +29,7 @@ eo LSHIFT 15 -> es
 lg OR lm -> ln
 dy OR ej -> ek
 NOT di -> dj
-1 AND fi -> fj
+one AND fi -> fj
 kf LSHIFT 15 -> kj
 NOT jy -> jz
 NOT ft -> fu
@@ -76,13 +61,13 @@ ia AND ig -> ii
 ck AND cl -> cn
 NOT jh -> ji
 z OR aa -> ab
-1 AND en -> eo
+one AND en -> eo
 ib AND ic -> ie
 NOT eh -> ei
 iy AND ja -> jb
 NOT bb -> bc
 ha OR gz -> hb
-1 AND cx -> cy
+one AND cx -> cy
 NOT ax -> ay
 ev OR ew -> ex
 bn RSHIFT 2 -> bo
@@ -102,7 +87,7 @@ hu LSHIFT 15 -> hy
 iw AND ix -> iz
 lf RSHIFT 1 -> ly
 fp OR fv -> fw
-1 AND am -> an
+one AND am -> an
 ap LSHIFT 1 -> bj
 u LSHIFT 1 -> ao
 b RSHIFT 5 -> f
@@ -118,11 +103,12 @@ jq OR jw -> jx
 iv AND jb -> jd
 cg OR ch -> ci
 iu AND jf -> jh
+lw OR lv -> lx
 lx -> a
-1 AND cc -> cd
+one AND cc -> cd
 ly OR lz -> ma
 NOT el -> em
-1 AND bh -> bi
+one AND bh -> bi
 fb AND fd -> fe
 lf OR lq -> lr
 bn RSHIFT 3 -> bp
@@ -150,7 +136,6 @@ kk RSHIFT 2 -> kl
 eq LSHIFT 1 -> fk
 dz OR ef -> eg
 NOT ed -> ee
-lw OR lv -> lx
 fw AND fy -> fz
 dz AND ef -> eh
 jp RSHIFT 3 -> jr
@@ -160,7 +145,7 @@ be AND bg -> bh
 lc LSHIFT 1 -> lw
 hm AND ho -> hp
 jr AND js -> ju
-1 AND io -> ip
+one AND io -> ip
 cm AND co -> cp
 ib OR ic -> id
 NOT bf -> bg
@@ -232,7 +217,7 @@ gh OR gi -> gj
 lj AND ll -> lm
 x OR ai -> aj
 bz AND cb -> cc
-1 AND lu -> lv
+one AND lu -> lv
 as RSHIFT 3 -> au
 ce OR cd -> cf
 il AND in -> io
@@ -249,7 +234,7 @@ at OR az -> ba
 x RSHIFT 3 -> z
 NOT lk -> ll
 lb OR la -> lc
-1 AND r -> s
+one AND r -> s
 lh OR li -> lj
 ln AND lp -> lq
 kk RSHIFT 5 -> kn
@@ -262,7 +247,7 @@ NOT jd -> je
 jp RSHIFT 2 -> jq
 jn OR jo -> jp
 lf RSHIFT 3 -> lh
-1 AND ds -> dt
+one AND ds -> dt
 lf AND lq -> ls
 la LSHIFT 15 -> le
 NOT fg -> fh
@@ -273,19 +258,19 @@ v OR w -> x
 kk OR kv -> kw
 ks AND ku -> kv
 kh LSHIFT 1 -> lb
-1 AND kz -> la
+one AND kz -> la
 NOT kc -> kd
 x RSHIFT 2 -> y
 et OR fe -> ff
 et AND fe -> fg
 NOT ac -> ad
 jl OR jk -> jm
-1 AND jj -> jk
+one AND jj -> jk
 bn RSHIFT 1 -> cg
 NOT kp -> kq
 ci RSHIFT 3 -> ck
 ev AND ew -> ey
-1 AND ke -> kf
+one AND ke -> kf
 cj AND cp -> cr
 ir LSHIFT 1 -> jl
 NOT gw -> gx
@@ -305,7 +290,7 @@ km OR kn -> ko
 ko AND kq -> kr
 bv AND bx -> by
 kl OR kr -> ks
-1 AND ht -> hu
+one AND ht -> hu
 df AND dg -> di
 NOT ag -> ah
 d OR j -> k
@@ -315,7 +300,7 @@ gf OR ge -> gg
 gg LSHIFT 1 -> ha
 bn RSHIFT 5 -> bq
 bo OR bu -> bv
-1 AND gy -> gz
+one AND gy -> gz
 s LSHIFT 15 -> w
 NOT ie -> if
 as RSHIFT 5 -> av
@@ -334,7 +319,7 @@ fl LSHIFT 1 -> gf
 he RSHIFT 3 -> hg
 gz LSHIFT 15 -> hd
 hf OR hl -> hm
-1 AND gd -> ge
+one AND gd -> ge
 fo OR fz -> ga
 id AND if -> ig
 fo AND fz -> gb
@@ -364,10 +349,91 @@ fo RSHIFT 3 -> fq
 he RSHIFT 2 -> hf"""
 
 
+def not_gate(wire_in: int):
+    # Convert to binary string and remove leading 0b
+    bin_string = bin(wire_in)[2:]
+
+    # Check the number of bits and if no 16 bit pad with zeros
+    if len(bin_string) < 16:
+        bin_string = "0" * (16 - len(bin_string)) + bin_string
+
+    # convert to bitarray for easier handling
+    bin_list = bitarray(bin_string)
+    inverted = ""
+    for bit in bin_list:
+        if bit == 0:
+            inverted = inverted + "1"
+        else:
+            inverted = inverted + "0"
+    inverted = "0b" + inverted
+    bin_to_int = int(inverted, 2)
+    return bin_to_int
+
+
+def left_shift(wire_in, number_to_shift):
+    output = int(bin(wire_in), 2) << number_to_shift
+    return output
+
+
+def right_shift(wire_in, number_to_shift):
+    output = int(bin(wire_in), 2) >> number_to_shift
+    return output
+
+
+def and_gate(wire_in_a, wire_in_b):
+    # Convert to binary string and remove leading 0b
+    bin_strings = [bin(wire_in_a)[2:], bin(wire_in_b)[2:]]
+
+    # Check the number of bits and if no 16 bit pad with zeros
+    for i, bin_string in enumerate(bin_strings):
+        if len(bin_string) < 16:
+            bin_strings[i] = "0" * (16 - len(bin_string)) + bin_string
+
+    # convert to bitarray for easier handling
+    bin_list = []
+    for bin_string in bin_strings:
+        bin_list.append(bitarray(bin_string))
+
+    output = ""
+    for i, bit in enumerate(bin_list[0]):
+        if bit == bin_list[1][i]:
+            output = output + str(bit)
+        else:
+            output = output + "0"
+
+    bin_to_int = int(output, 2)
+    return bin_to_int
+
+
+def or_gate(wire_in_a, wire_in_b):
+    # Convert to binary string and remove leading 0b
+    bin_strings = [bin(wire_in_a)[2:], bin(wire_in_b)[2:]]
+
+    # Check the number of bits and if no 16 bit pad with zeros
+    for _, bin_string in enumerate(bin_strings):
+        if len(bin_string) < 16:
+            bin_strings[_] = "0" * (16 - len(bin_string)) + bin_string
+
+    # convert to bitarray for easier handling
+    bin_list = []
+    for bin_string in bin_strings:
+        bin_list.append(bitarray(bin_string))
+
+    output = ""
+    for _, bit in enumerate(bin_list[0]):
+        if bit == 0 and bin_list[1][_] == 0:
+            output = output + str(0)
+        else:
+            output = output + "1"
+
+    bin_to_int = int(output, 2)
+    return bin_to_int
+
+
 class Circuit:
 
-    def __init__(self):
-        self.wire_name = None
+    def __getattr__(self, item):
+        return self.item
 
 
 if __name__ == "__main__":
@@ -379,16 +445,91 @@ x LSHIFT 2 -> f
 y RSHIFT 2 -> g
 NOT x -> h
 NOT y -> i"""
-    test = test.split("\n")
+    input_string = input_string.split("\n")
+    import random
+    random.shuffle(input_string)
     # print(test)
+    operations = ["AND", "OR", "LSHIFT", "RSHIFT", "NOT"]
+    wires = []
 
-    for line in test:
-        line = line.split(" ")
-        # print(line)
-        for i, entry in enumerate(line):
-            if entry == "->":
-                # print(i)
-                pass
+
+    for line in input_string:
+        wires.append(line[-1])
+
+    circuit = Circuit()
+    running = True
+    run = 0
+    while running:
+        done = 0
+        print(f"Run {run}")
+        run+=1
+        for i, line in enumerate(input_string):
+            # print(i, line)
+            wire_out = ""
+            line = line.split(" ")
+            # print(line)
+            for i, entry in enumerate(line):
+                if entry == "->":
+                    wire_out = line[i+1]
+
+            if "AND" in line:
+                try:
+                    circuit.__setattr__(line[4], and_gate(circuit.__getattribute__(line[0]), circuit.__getattribute__(line[2])))
+                    done +=1
+                except:
+                    pass
+
+
+            if "OR" in line:
+                try:
+                    circuit.__setattr__(line[4], or_gate(circuit.__getattribute__(line[0]), circuit.__getattribute__(line[2])))
+                    done += 1
+                except:
+                    pass
+
+            if "LSHIFT" in line:
+                try:
+                    circuit.__setattr__(line[4],
+                                        left_shift(circuit.__getattribute__(line[0]), int(line[2])))
+                    done += 1
+                except:
+                    pass
+
+            if "RSHIFT" in line:
+                try:
+                    circuit.__setattr__(line[4],
+                                        right_shift(circuit.__getattribute__(line[0]), int(line[2])))
+                    done += 1
+
+                except:
+                    pass
+
+            if "NOT" in line:
+                try:
+                    circuit.__setattr__(line[3],
+                                        not_gate(circuit.__getattribute__(line[1])))
+                    done += 1
+                except:
+                    pass
+
+            if len(line) == 3:
+                try:
+                    if line[0].isnumeric():
+                        circuit.__setattr__(line[2], int(line[0]))
+                        done += 1
+                    else:
+                        circuit.__setattr__(line[2], circuit.__getattribute__(line[0]))
+
+                        done += 1
+                except:
+                    pass
+
+            if done == len(input_string):
+                running = False
+
+    for k, v in circuit.__dict__.items():
+        if k == "lx":
+            print(v)
 
     # circuit = Circuit()
     # setattr(circuit, "jk", 0)
