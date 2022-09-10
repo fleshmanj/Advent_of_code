@@ -14,5 +14,5 @@ def test_depth_increased_or_decreased():
     i = InputHandler(test_input_1, d)
     o = OutputHandler(d, i.data_out)
     o.read_measurements()
-    o.show_results(d)
+    o.show_results()
     assert d.recorded_increase == 7

@@ -1,9 +1,3 @@
-import time
-import os
-
-now = time.time()
-
-
 class DepthFinder:
     current_depth: int
     previous_depth: int | None
