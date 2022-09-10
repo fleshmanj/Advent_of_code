@@ -1,6 +1,5 @@
 import requests
 import mine
-import re
 
 headers = mine.cookies
 
